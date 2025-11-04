@@ -1,6 +1,4 @@
 /*
-    Equivalente a los tests de ropeEnteros pero usa el ropeGenerico implementado con concepts
-
     Un caso de prueba consiste en lo siguiente:
     
     La primer linea consiste en dos numeros, n y q.

@@ -45,6 +45,7 @@
 
 # archivos de salida de test
 *.actual_out
+*.check
 
 # Ignorar archivos llamados "tester" en tests/ y sus subcarpetas
 /tests/**/tester

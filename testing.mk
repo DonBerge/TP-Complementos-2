@@ -1,17 +1,20 @@
 # Este makefile de test esta fuertemente inspirado en el usado en la materia "Compiladores"
 
 TESTDIRS += tests/ropeEnteros
-TESTDIRS += tests/ropeEnterosGenerico
+TESTDIRS += tests/ropeGenericoSuma
+TESTDIRS += tests/ropeGenericoMinimo
+TESTDIRS += tests/ropeGenericoPrefijos
+TESTDIRS += tests/ropeGenericoSubarray
 
 TESTS	:= $(shell find $(TESTDIRS) -name '*.in' -type f | sort)
 
 CC  := g++
-CFLAGS := -lgc -std=c++20
+CFLAGS := -lgc -std=c++20 -g
 
 EXTRAFLAGS	:=
 
-CHECK := $(patsubst %.in,%.actual_out,$(TESTS))
-CHECK	+= $(patsubst %.in,%.check,$(TESTS))
+OUTS := $(patsubst %.in,%.actual_out,$(TESTS))
+CHECK := $(patsubst %.in,%.check,$(TESTS))
 
 TESTERS := $(addsuffix /tester,$(TESTDIRS))
 
@@ -37,7 +40,10 @@ endif
 %.check: %.out %.actual_out
 	$(Q)if diff -u -q $^; then \
 		echo "OK	$(patsubst %.out,%,$<)"; \
+		touch $@; \
 	else \
 		echo "FAILED	$(patsubst %.out,%,$<)"; \
 		false; \
 	fi
+
+.SECONDARY: $(OUTS)
