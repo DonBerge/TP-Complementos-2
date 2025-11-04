@@ -48,3 +48,7 @@
 
 # Ignorar archivos llamados "tester" en tests/ y sus subcarpetas
 /tests/**/tester
+
+# No ignorar archivos .out en tests/ y subcarpetas
+!tests/**/*.out
+!tests/*.out
