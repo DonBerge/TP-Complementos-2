@@ -1,6 +1,7 @@
 # Este makefile de test esta fuertemente inspirado en el usado en la materia "Compiladores"
 
 TESTDIRS += tests/ropeEnteros
+TESTDIRS += tests/ropeEnterosGenerico
 
 TESTS	:= $(shell find $(TESTDIRS) -name '*.in' -type f | sort)
 

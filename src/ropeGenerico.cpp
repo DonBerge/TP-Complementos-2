@@ -26,7 +26,7 @@ template<typename Op>
 requires Monoid<Op>
 class Rope {
 public:
-    Rope(int n) { v.resize(2*n+1); N=n; }
+    Rope(int n) { v.resize(4*n); N=n; }
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
     void update(int i, typename Op::Value x) { update_impl(0,0,N,i,x); }
 
@@ -67,18 +67,4 @@ private:
         update_impl(der(nodo), m_, r_, i, x);
         v[nodo] = Op::op(v[izq(nodo)], v[der(nodo)]); // actualizo de abajo hacia arriba
     }
-};
-
-struct int_suma {
-using Value = int;
-    static int op(int x, int y) { return x + y; } // una operacion asociativa
-    static int neut() { return 0; } // elemento neutro para op
-    static int input() { int x; cin>>x; return x; }
-};
-
-struct string_conca {
-using Value = string;
-    static Value op(string x, string y) { return x + y; } // una operacion asociativa
-    static Value neut() { return ""; } // elemento neutro para op
-    static Value input() { Value x; cin>>x; return x; }
 };
