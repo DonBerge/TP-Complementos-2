@@ -82,16 +82,3 @@ using Value = string;
     static Value neut() { return ""; } // elemento neutro para op
     static Value input() { Value x; cin>>x; return x; }
 };
-
-
-
-int main() {
-    int n;
-    cin>>n;
-    Rope<int_suma> rope(n);
-    for(int i=0;i<n;i++)
-        rope.update(i, int_suma::input());
-    int l,r;
-    cin>>l>>r;  
-    cout<<rope.query(l,r)<<endl;
-}
