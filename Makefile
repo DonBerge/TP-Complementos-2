@@ -6,7 +6,6 @@ BUILD_DIR := build
 BIN_DIR := bin
 SRCS := $(wildcard $(SRC_DIR)/*.cpp)
 OBJS := $(patsubst $(SRC_DIR)/%.cpp,$(BUILD_DIR)/%.o,$(SRCS))
-TGT := $(BIN_DIR)/app
 
 .PHONY: all clean
 
@@ -18,8 +17,15 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp | $(BUILD_DIR)
 $(BUILD_DIR) $(BIN_DIR):
 	mkdir -p $@
 
+include testing.mk
+test:
+	$(MAKE) test_all
+
 clean:
 	rm -rf $(BUILD_DIR) $(BIN_DIR)
+	find tests \( -name "*.actual*" -o -name "tester" -o -name "*.bc" -o -name "*.check*" -o -name "*.c" -o -name "*.bin" \) -exec rm {} \;
+	@echo "Se eliminaron los archivos complementarios de test."
+
 
 #.PHONY: run test
 #.DELETE_ON_ERROR:

@@ -1,45 +1,25 @@
 # Este makefile de test esta fuertemente inspirado en el usado en la materia "Compiladores"
 
-#TESTDIRS += tests/ok/00-basicos
-TESTDIRS += tests/ok/10-sugar
-TESTDIRS += tests/ok/11-multibinders
-TESTDIRS += tests/ok/20-tysym
-TESTDIRS += tests/ok/custom
+TESTDIRS += tests/ropeEnteros
 
-TESTS	:= $(shell find $(TESTDIRS) -name '*.fd4' -type f | sort)
+TESTS	:= $(shell find $(TESTDIRS) -name '*.in' -type f | sort)
 
-# Buscamos el ejecutable que genera cabal porque correr esto es más rápido
-# que correr 'cabal run'. También nos sirve para marcar la dependencia, y
-# no volver a correr los tests si el compilador no cambió.
-EXE	:= $(shell cabal exec whereis compiladores2025 | awk '{print $$2};')
-VM	:= ./vm/macc
-CC  := gcc
-CFLAGS := -lgc
+CC  := g++
+CFLAGS := -lgc -std=c++20
 
 EXTRAFLAGS	:=
 
-# Las reglas a chequear. Se puede deshabilitar toda una familia de tests
-# comentando una de estas líneas.
-CHECK	+= $(patsubst %,%.check_eval,$(TESTS))
-CHECK	+= $(patsubst %,%.check_pp,$(TESTS))
-CHECK	+= $(patsubst %,%.check_cek,$(TESTS))
-CHECK	+= $(patsubst %,%.check_bc_h,$(TESTS))
-CHECK	+= $(patsubst %,%.check_bc,$(TESTS))
-# CHECK	+= $(patsubst %,%.check_eval_opt,$(TESTS))
-# CHECK	+= $(patsubst %,%.check_opt,$(TESTS))
-# CHECK	+= $(patsubst %,%.check_cc,$(TESTS))
+CHECK := $(patsubst %.in,%.actual_out,$(TESTS))
+CHECK	+= $(patsubst %.in,%.check,$(TESTS))
 
-# Ejemplo: así se puede apagar un test en particular.
-# Estps no funcan porque todavia nos faltan cosas
-#CHECK	:= $(filter-out tests/ok/10-sugar/220-inlining3.%,$(CHECK))
-# CHECK	:= $(filter-out tests/ok/10-sugar/200-inlining.%,$(CHECK))
-# CHECK	:= $(filter-out tests/ok/10-sugar/350-print_as_arg.%,$(CHECK))
-# CHECK	:= $(filter-out tests/ok/10-sugar/430-canon_let.%,$(CHECK))
-# CHECK	:= $(filter-out tests/ok/10-sugar/test0_countdown_7.%,$(CHECK))
+TESTERS := $(addsuffix /tester,$(TESTDIRS))
+
+$(TESTERS): %/tester: %/tester.cpp
+	$(Q)$(CC) $(CFLAGS) $(EXTRAFLAGS) -o $@ $<
 
 # Esta regla corre todos los tests (por sus dependencias) y luego
 # imprime un mensaje.
-test_all: $(CHECK)
+test_all: $(TESTERS) $(CHECK)
 	@echo "---------------------------------"
 	@echo "             Todo OK             "
 	@echo "---------------------------------"
@@ -49,142 +29,14 @@ ifneq ($(V),)
 	Q=
 endif
 
-# Esto cancela la regla por defecto de make para generar un .out
-# copiando el archivo original.
-%.out: %
+%.actual_out: %.in
+	$(Q)"$(dir $<)tester" < $< > $@
 
-# Aceptar la salida de los programas como correcta. Copia de la salida
-# real del evaluador hacia los .out que contienen la salida esperada.
-#
-# Si no existen los archivos, los crea, así que esto puede usarse para
-# agregar un nuevo test.
-#
-# La _única_ salida que se acepta es la del --eval. Todos los demás
-# evaluadores/backends deben coincidir.
-accept: $(patsubst %,%.accept,$(TESTS))
-
-# La otra salida esperada es la de las optimizaciones.
-# accept: $(patsubst %,%.accept_opt,$(TESTS))
-
-%.accept: %.actual_out_eval
-	@echo "ACCEPT	$(patsubst %.accept,%,$@)"
-	$(Q)cp $< $(patsubst %.actual_out_eval,%.out,$<)
-
-# Generar salida con el evaluador naive.
-%.actual_out_eval: % $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --eval $< > $@
-
-# Comparar salida naive con esperada.
-%.check_eval: %.out %.actual_out_eval
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	EVAL	$(patsubst %.out,%,$<)"
-
-# Borra los colores del pretty printer
-RM_COLORS = sed -r 's/\x1B\[[0-9;]*[mK]//g'
-
-# Chequear pretty printing. Chequear que el programa despues de ser
-# prettyprinteado tenga la misma salida que el original
-# Correr el compilador con --typecheck y volcar la salida en .actual_pp_out
-%.actual_pp_out: % $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --typecheck $< | $(RM_COLORS) > $@
-
-# Generar salida con el evaluador naive.
-%.actual_pp_eval: % %.actual_pp_out $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --eval $*.actual_pp_out > $@
-
-# Comparar salida naive con esperada.
-%.check_pp: %.out %.actual_pp_eval
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	PP	$(patsubst %.out,%,$<)"
-
-# Idem CEK
-%.actual_out_cek: % $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --cek $< > $@
-
-%.check_cek: %.out %.actual_out_cek
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	CEK	$(patsubst %.out,%,$<)"
-
-
-# Bytecode. Primero la regla para generar el bytecode, no se chequea
-# nada.
-%.bc: %.fd4 $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --bytecompile $< >/dev/null
-
-# Correr bytecode para generar la salida (con VM en C).
-# Finalmente la comparación.
-%.fd4.actual_out_bc: %.bc $(VM)
-	$(Q)$(VM) $< > $@
-
-%.check_bc: %.out %.actual_out_bc
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	bc	$(patsubst %.out,%,$<)"
-
-# Idem pero para Macchina en Haskell.
-%.fd4.actual_out_bc_h: %.bc $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --runVM $< > $@
-
-%.check_bc_h: %.out %.actual_out_bc_h
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	bc H	$(patsubst %.out,%,$<)"
-
-# Chequear optimizaciones. No se corre nada, sólo se compara
-# la salida de --typecheck --optimize respecto a la esperada
-# (guardada en un archivo)
-%.actual_opt_out: % $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --typecheck --optimize $< > $@
-
-%.check_opt: %.opt_out %.actual_opt_out
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	OPT	$(patsubst %.out,%,$<)"
-
-%.accept_opt: %.actual_opt_out
-	cp $< $(patsubst %.actual_opt_out,%.opt_out,$<)
-
-# Evaluar código optimizado, sólo vía eval, se supone que debe ser
-# suficiente.
-
-%.actual_out_eval_opt: % $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --eval --optimize $< > $@
-
-%.check_eval_opt: %.out %.actual_out_eval_opt
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	EVALOPT	$(patsubst %.out,%,$<)"
-
-
-# Generamos el código en C, no se chequea nada.
-%.c: %.fd4 $(EXE)
-	$(Q)$(EXE) $(EXTRAFLAGS) --cc $< >/dev/null
-
-# Compilamos y ejecutamos el archivo guardado. Por último, comparamos.
-%.fd4.actual_out_cc: %.c runtime.c
-	$(Q)$(CC) runtime.c $< -o $(patsubst %.c,%.bin,$<) $(CFLAGS)
-	$(Q)./$(patsubst %.c,%.bin,$<) > $@
-
-%.check_cc: %.out %.actual_out_cc
-	$(Q)diff -u $^
-	$(Q)touch $@
-	@echo "OK	CC	$(patsubst %.out,%,$<)"
-
-# Estas directivas indican que NO se borren los archivos intermedios,
-# así podemos examinarlos, particularmente cuando algo no anda.
-.SECONDARY: $(patsubst %,%.actual_out_eval,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_out_cek,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_out_bc,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_out_bc_h,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_out_eval_opt,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_opt_out,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_out_cc,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_pp_out,$(TESTS))
-.SECONDARY: $(patsubst %,%.actual_pp_eval,$(TESTS))
-.SECONDARY: $(patsubst %.fd4,%.bc,$(TESTS))
-.SECONDARY: $(patsubst %.fd4,%.c,$(TESTS))
-
-.PHONY: test_all accept
+# Comparar salidas
+%.check: %.out %.actual_out
+	$(Q)if diff -u -q $^; then \
+		echo "OK	$(patsubst %.out,%,$<)"; \
+	else \
+		echo "FAILED	$(patsubst %.out,%,$<)"; \
+		false; \
+	fi

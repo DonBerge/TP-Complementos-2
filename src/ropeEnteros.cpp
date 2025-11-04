@@ -1,6 +1,7 @@
 #include <vector>
 #include <iostream>
 #include <cassert>
+#include "interval.cpp"
 
 #define fst first
 #define snd second
@@ -9,38 +10,12 @@
 
 using namespace std;
 
-typedef pair<int,int> Interval;
-Interval eInterval = {0,0};
-
-
-
-int interval_len(Interval i)
-{
-    return i.snd - i.fst;
-}
-
-Interval interval_meet(Interval i, Interval j)
-{
-    int a = i.fst,b=i.snd,c=j.fst,d=j.snd;
-
-    if(a<=c && d<=b)
-        return {c,d};
-    if(c<=a && b<=d)
-        return {a,b};
-    if(a<=c && b<=d)
-        return {c,b};
-    if(c<=a && d<=b)
-        return {a,d};
-    return eInterval;
-}
-
-bool interval_subset(Interval i, Interval j)
-{
-    return interval_meet(i,j)==i;
-}
+// Usamos long long porque minimiza el riesgo de overflow y por lo
+// tanto permite que la operacion sea cerrada.
+using ll = long long;
 
 struct Rope {
-    vector<int> v;
+    vector<ll> v;
     int N;
 
     Rope(int n) {
@@ -48,13 +23,13 @@ struct Rope {
         N=n;
     }
 
-    int query(int l, int r)
+    ll query(int l, int r)
     {
         return query(l,r,0,0,N);
     }
-    void update(int i, int x) { update_impl(0,0,N,i,x); }
+    void update(int i, ll x) { update_impl(0,0,N,i,x); }
 
-    int query(int l, int r, int i, int lp, int rp) {
+    ll query(int l, int r, int i, int lp, int rp) {
         if(r<=l)
             return 0;
         if(interval_subset({lp,rp},{l,r}))
@@ -67,7 +42,7 @@ struct Rope {
         return query(ml.first,ml.second, izq(i), lp, mid) + query(mr.first,mr.second, der(i), mid, rp);
     }
 
-    void update_impl(int nodo, int l_, int r_, int i, int x) {
+    void update_impl(int nodo, int l_, int r_, int i, ll x) {
         int l = i, r = i+1;
         if (l <= l_ && r_ <= r) { 
             v[nodo] = x; 
@@ -81,5 +56,4 @@ struct Rope {
         update_impl(der(nodo), m_, r_, i, x);
         v[nodo] = v[izq(nodo)] + v[der(nodo)]; // actualizo de abajo hacia arriba
     }
-
 };

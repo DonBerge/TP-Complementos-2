@@ -42,3 +42,9 @@
 
 # Archivos txt, usados para entrada y salida
 *.txt
+
+# archivos de salida de test
+*.actual_out
+
+# Ignorar archivos llamados "tester" en tests/ y sus subcarpetas
+/tests/**/tester
