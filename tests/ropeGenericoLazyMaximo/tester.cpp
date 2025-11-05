@@ -17,14 +17,23 @@
 */
 #include <iostream>
 #include <vector>
+#include <climits>
 #include "../../src/ropeGenericoLazy.cpp"
 
 using ll = long long;
 
 struct ll_suma {
 using Value = ll;
-    static Value op(Value x, Value y) { return x + y; } // una operacion asociativa
-    static Value neut() { return 0; } // elemento neutro para op
+using Update = ll;
+    static Value op(Value x, Value y) { return max(x,y); } // una operacion asociativa
+    static Value neut() { return LONG_LONG_MIN; } // elemento neutro para op
+    static Update up(Update x, Update y) { return x + y; }
+    static Update uneut() { return 0; } // elemento neutro para op
+    static Update applyToInterval(Interval i, Value v, Update u) { 
+        if(v==LONG_LONG_MIN)
+            return LONG_LONG_MIN;
+        return v+u;
+     }
     static Value input() { Value x; cin>>x; return x; }
 };
 
@@ -36,7 +45,7 @@ int main()
     cin>>n>>q;
     Rope<ll_suma> rope(n);
     for(int i=0;i<n;i++)
-        rope.update(i,ll_suma::input());
+        rope.update(i,ll_suma::input() - LONG_LONG_MIN);
     while(q--)
     {
         int t;

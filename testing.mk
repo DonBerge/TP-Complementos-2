@@ -6,6 +6,7 @@ TESTDIRS += tests/ropeGenericoSuma
 TESTDIRS += tests/ropeGenericoMinimo
 TESTDIRS += tests/ropeGenericoPrefijos
 TESTDIRS += tests/ropeGenericoSets
+TESTDIRS += tests/ropeGenericoLazyMaximo
 TESTDIRS += tests/ropeGenericoLazySuma
 
 TESTS	:= $(shell find $(TESTDIRS) -name '*.in' -type f | sort)
@@ -21,6 +22,7 @@ CHECK := $(patsubst %.in,%.check,$(TESTS))
 TESTERS := $(addsuffix /tester,$(TESTDIRS))
 
 $(TESTERS): %/tester: %/tester.cpp
+	find "$(dir $<)" \( -name "*.actual*" -o -name "tester" -o -name "*.check*" \) -exec rm {} \;
 	$(Q)$(CC) $(CFLAGS) $(EXTRAFLAGS) -o $@ $<
 
 # Esta regla corre todos los tests (por sus dependencias) y luego
@@ -40,7 +42,7 @@ endif
 
 # Comparar salidas
 %.check: %.out %.actual_out
-	$(Q)if diff -u -q $^; then \
+	$(Q)if diff -u $^; then \
 		echo "OK	$(patsubst %.out,%,$<)"; \
 		touch $@; \
 	else \
@@ -49,4 +51,4 @@ endif
 	fi
 
 # Descomentar para no borrar los archivos *.actual_out
-# .SECONDARY: $(OUTS)
+.SECONDARY: $(OUTS)
