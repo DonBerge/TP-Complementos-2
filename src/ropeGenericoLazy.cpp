@@ -88,6 +88,7 @@ private:
             return;
         if(r-l==1) // hoja
             v[i] = a[l];
+            
     }
     
     Op::Value query(int l, int r, int i, int lp, int rp) {
