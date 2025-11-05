@@ -38,25 +38,27 @@ bool interval_subset(Interval i, Interval j)
     return interval_meet(i,j)==i;
 }
 
+using ll = long long;
+
 struct Rope {
-    vector<int> v;
-    vector<int> lazy;
+    vector<ll> v;
+    vector<ll> lazy;
     int N;
 
     Rope(int n) {
-        v.resize(2*n+1);
-        lazy.resize(2*n+1);
+        v.resize(4*n);
+        lazy.resize(4*n);
         N=n;
     }
 
-    int query(int l, int r)
+    ll query(int l, int r)
     {
         return query(l,r,0,0,N);
     }
-    void update(int i, int x) { update_rango(i,i+1,x); }
-    void update_rango(int l, int r, int x) { update_impl(0,0,N,l,r,x);}
+    void update(int i, ll x) { update_rango(i,i+1,x); }
+    void update_rango(int l, int r, ll x) { update_impl(0,0,N,l,r,x);}
 
-    int query(int l, int r, int i, int lp, int rp) {
+    ll query(int l, int r, int i, int lp, int rp) {
         if(r<=l)
             return 0;
 
@@ -77,7 +79,7 @@ struct Rope {
         return query(ml.first,ml.second, izq(i), lp, mid) + query(mr.first,mr.second, der(i), mid, rp);
     }
 
-    void update_impl(int node, int l_, int r_, int l, int r, int upd) {
+    void update_impl(int node, int l_, int r_, int l, int r, ll upd) {
         propagate(node, l_, r_);
         if (l <= l_ && r_ <= r) { lazy[node] = upd; propagate(node, l_, r_); return; }
         if (r <= l_ || r_ <= l) { return; }
@@ -97,19 +99,3 @@ struct Rope {
         lazy[node] = 0;
     }
 };
-
-int main() {
-    int n;
-    cin>>n;
-    Rope rope(n);
-    for(int i=0;i<n;i++)
-    {
-        int x;
-        cin>>x;
-        rope.update(i, x);
-    }
-    rope.update_rango(0,n,10);
-    int l,r;
-    cin>>l>>r;  
-    cout<<rope.query(l,r)<<endl;
-}

@@ -25,18 +25,22 @@ template<typename T>
 requires Monoid<T>
 T::Value powa(typename T::Value v, int i)
 {
-    if(i==0)
-        return T::neut();
-    if(i & 1)
-        return T::op(powa<T>(v,i-1),v);
-    return T::op(powa<T>(v,i/2), powa<T>(v,i/2));
+    auto res = T::neut();
+    while(i > 0)
+    {
+        if(i & 1)
+            res = T::op(res,v);
+        v = T::op(v,v);
+        i >>= 1;
+    }
+    return res;
 }
 
 template<typename Op>
 requires Monoid<Op>
 class Rope {
 public:
-    Rope(int n) { v.resize(2*n+1); N=n; lazy.resize(2*n+1); }
+    Rope(int n) { v.resize(4*n); N=n; lazy.resize(4*n); }
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
     void update(int i, Op::Value x) { update_rango(i,i+1,x); }
     void update_rango(int l, int r, Op::Value x) { update_impl(0,0,N,l,r,x);}
@@ -91,18 +95,4 @@ private:
         v[node] = Op::op(v[node], powa<Op>(lazy[node],len));
         lazy[node] = Op::neut();
     }
-};
-
-struct int_suma {
-using Value = int;
-    static int op(int x, int y) { return x + y; } // una operacion asociativa
-    static int neut() { return 0; } // elemento neutro para op
-    static int input() { int x; cin>>x; return x; }
-};
-
-struct string_conca {
-using Value = string;
-    static Value op(string x, string y) { return x + y; } // una operacion asociativa
-    static Value neut() { return ""; } // elemento neutro para op
-    static Value input() { Value x; cin>>x; return x; }
 };

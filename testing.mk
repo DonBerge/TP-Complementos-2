@@ -1,10 +1,12 @@
 # Este makefile de test esta fuertemente inspirado en el usado en la materia "Compiladores"
 
 TESTDIRS += tests/ropeEnteros
+TESTDIRS += tests/ropeEnterosLazy
 TESTDIRS += tests/ropeGenericoSuma
 TESTDIRS += tests/ropeGenericoMinimo
 TESTDIRS += tests/ropeGenericoPrefijos
 TESTDIRS += tests/ropeGenericoSets
+TESTDIRS += tests/ropeGenericoLazySuma
 
 TESTS	:= $(shell find $(TESTDIRS) -name '*.in' -type f | sort)
 
@@ -46,4 +48,5 @@ endif
 		false; \
 	fi
 
-.SECONDARY: $(OUTS)
+# Descomentar para no borrar los archivos *.actual_out
+# .SECONDARY: $(OUTS)
