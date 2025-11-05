@@ -26,7 +26,7 @@ template<typename Op>
 requires Monoid<Op>
 class Rope {
 public:
-    Rope(int n) { v.resize(4*n); N=n; }
+    Rope(int n) { v.resize(4*n, Op::neut()); N=n; }
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
     void update(int i, typename Op::Value x) { update_impl(0,0,N,i,x); }
 
