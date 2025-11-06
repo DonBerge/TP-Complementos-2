@@ -22,31 +22,37 @@
 
 using ll = long long;
 
+vector<ll> a;
+
 struct ll_suma {
 using Value = ll;
 using Update = ll;
-    static Value op(Value x, Value y) { return max(x,y); } // una operacion asociativa
-    static Value neut() { return LONG_LONG_MIN; } // elemento neutro para op
-    static Update up(Update x, Update y) { return x + y; }
-    static Update uneut() { return 0; } // elemento neutro para op
-    static Update applyToInterval(Interval i, Value v, Update u) { 
-        if(v==LONG_LONG_MIN)
-            return LONG_LONG_MIN;
-        return v+u;
-     }
     static Value input() { Value x; cin>>x; return x; }
 };
 
 using namespace std;
 
+void updateRango(int l,int r, ll u)
+{
+    for(int i=l;i<r;i++)
+        a[i]+=u;
+}
+
+ll query(int l,int r)
+{
+    ll ans = LONG_LONG_MIN;
+    for(int i=l;i<r;i++)
+        ans=max(ans,a[i]);
+    return ans;
+}
+
+
 int main()
 {
     int n,q;
     cin>>n>>q;
-    vector<ll> a;
     for(int i=0;i<n;i++)
         a.push_back(ll_suma::input());    
-    Rope<ll_suma> rope(a);
     while(q--)
     {
         int t;
@@ -55,13 +61,13 @@ int main()
         {
             int a,b,u;
             cin>>a>>b>>u;
-            rope.update_rango(a-1,b,u); // -1 porque los indices empiezan en 1
+            updateRango(a-1,b,u); // -1 porque los indices empiezan en 1
         }
         else
         {
             int a,b;
             cin>>a>>b;
-            cout<<rope.query(a-1,b)<<endl; // -1 porque rope usa intervalos cerrado abierto
+            cout<<query(a-1,b)<<endl; // -1 porque rope usa intervalos cerrado abierto
         }
     }
     return 0;

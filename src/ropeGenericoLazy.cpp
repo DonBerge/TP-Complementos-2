@@ -70,7 +70,13 @@ template<typename Op>
 requires Updater<Op>
 class Rope {
 public:
+    // Construye un rope vacio de tamaño n
     Rope(int n) { v.resize(4*n, Op::neut()); N=n; lazy.resize(4*n,Op::uneut()); }
+    // Construye un rope a partir de un array
+    Rope(vector<typename Op::Value>& a) : Rope(a.size()) { // primero construyo el rope vacio con N=a.size()
+        build(a,0,0,a.size()); // Luego llamo a build usando el array a
+    }
+    
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
     void update(int i, Op::Update x) { update_rango(i,i+1,x); }
     void update_rango(int l, int r, Op::Update x) { update_impl(0,0,N,l,r,x);}
@@ -82,13 +88,22 @@ private:
     std::vector<bool> markForUpdate;
     int N;
 
-    void build(vector<int>& a,int i, int lp, int rp)
+    // Ya no es posible construir el rope haciendo un update por cada elemento del array
+    // ya que la operacion de actualizacion puede diferir de la de consulta.
+    // Por lo tanto tenemos una funcion para construir el rope a partir de un vector
+    void build(vector<typename Op::Value>& a,int node, int lp, int rp)
     {
-        if(r<=l)
+        if(rp<=lp)
             return;
-        if(r-l==1) // hoja
-            v[i] = a[l];
-            
+        if(rp-lp==1) // hoja
+            v[node] = a[lp];
+        else
+        {
+            int m = (lp + rp)/2;
+            build(a,izq(node),lp,m);
+            build(a,der(node),m,rp);
+            v[node]=Op::op(v[izq(node)],v[der(node)]);
+        }
     }
     
     Op::Value query(int l, int r, int i, int lp, int rp) {
@@ -106,7 +121,6 @@ private:
 
         int mid = (lp+rp)/2;
 
-        
         Interval ml = interval_meet(m, {lp,mid});
         Interval mr = interval_meet(m, {mid, rp});
         return

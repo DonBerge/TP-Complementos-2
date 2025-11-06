@@ -51,4 +51,4 @@ endif
 	fi
 
 # Descomentar para no borrar los archivos *.actual_out
-.SECONDARY: $(OUTS)
+# .SECONDARY: $(OUTS)
