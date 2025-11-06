@@ -18,7 +18,7 @@
 #include <iostream>
 #include <vector>
 #include <climits>
-#include "../../src/ropeGenericoLazy.cpp"
+#include "../../../src/ropeGenericoLazy.cpp"
 
 using ll = long long;
 
@@ -28,7 +28,6 @@ using Update = ll;
     static Value op(Value x, Value y) { return max(x,y); } // una operacion asociativa
     static Value neut() { return LONG_LONG_MIN; } // elemento neutro para op
     static Update up(Update x, Update y) { return x + y; }
-    static Update uneut() { return 0; } // elemento neutro para op
     static Update applyToInterval(Interval i, Value v, Update u) { 
         if(v==LONG_LONG_MIN)
             return LONG_LONG_MIN;

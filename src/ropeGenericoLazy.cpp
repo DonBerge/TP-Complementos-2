@@ -60,7 +60,7 @@ public:
     { 
         N=n;
         v.resize(4*n, Op::neut());
-        lazy.resize(4*n,Op::uneut());
+        lazy.resize(4*n);
         markForUpdate.resize(4*n,false); 
     }
     // Construye un rope a partir de un array

@@ -17,7 +17,7 @@
 */
 #include <iostream>
 #include <vector>
-#include "../../src/ropeGenericoLazy.cpp"
+#include "../../../src/ropeGenericoLazy.cpp"
 
 using ll = long long;
 
@@ -26,7 +26,6 @@ using Value = ll;
 using Update = ll;
     static Value op(Value x, Value y) { return x + y; } // una operacion asociativa
     static Value neut() { return 0; } // elemento neutro para op
-    static Value uneut() { return 0; } // elemento neutro para op
     static Update up(Value x, Value y) { return x + y; }
     static Update applyToInterval(Interval i, Value v, Update u) { return v+u*(i.second-i.first); }
     static Value input() { Value x; cin>>x; return x; }
