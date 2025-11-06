@@ -42,36 +42,27 @@ typename T::Value; // hay un tipo de valores
 template<typename T>
 concept Updater = Monoid<T> && requires(T::Value a, T::Update b, T::Update c, Interval i) {
 typename T::Update; // hay un tipo de actualizaciones
-{ T::up(a, b) } -> std::same_as<typename T::Update>; // clausura de la operacion
+// up es la operacion de actualizacion
+{ T::up(b, c) } -> std::same_as<typename T::Update>; // clausura de la operacion
 // T::up(a, T::up(b, c)) == T::up(T::up(a, b), c) // asociatividad de la operacion
-{ T::uneut() } -> std::same_as<typename T::Update>; 
 { T::applyToInterval(i, a, b)} -> std::same_as<typename T::Value>;
 // i = Intervalo donde se ejecuta la actualizacion
 // a = Valor correspondiente al intervalo
 // b = Valor de la actualizacion combinada
 };
 
-template<typename T>
-requires Monoid<T>
-T::Value powa(typename T::Value v, int i)
-{
-    auto res = T::neut();
-    while(i > 0)
-    {
-        if(i & 1)
-            res = T::op(res,v);
-        v = T::op(v,v);
-        i >>= 1;
-    }
-    return res;
-}
-
 template<typename Op>
 requires Updater<Op>
 class Rope {
 public:
     // Construye un rope vacio de tamaño n
-    Rope(int n) { v.resize(4*n, Op::neut()); N=n; lazy.resize(4*n,Op::uneut()); }
+    Rope(int n) 
+    { 
+        N=n;
+        v.resize(4*n, Op::neut());
+        lazy.resize(4*n,Op::uneut());
+        markForUpdate.resize(4*n,false); 
+    }
     // Construye un rope a partir de un array
     Rope(vector<typename Op::Value>& a) : Rope(a.size()) { // primero construyo el rope vacio con N=a.size()
         build(a,0,0,a.size()); // Luego llamo a build usando el array a
@@ -132,7 +123,7 @@ private:
 
     void update_impl(int node, int l_, int r_, int l, int r, Op::Update upd) {
         propagate(node, l_, r_);
-        if (l <= l_ && r_ <= r) { lazy[node] = upd; propagate(node, l_, r_); return; }
+        if (l <= l_ && r_ <= r) { markForUpdate[node]=true; lazy[node] = upd; propagate(node, l_, r_); return; }
         if (r <= l_ || r_ <= l) { return; }
         int m_ = (l_ + r_) / 2;
         update_impl(izq(node), l_, m_, l, r, upd);
@@ -140,13 +131,30 @@ private:
         v[node] = Op::op(v[izq(node)], v[der(node)]);
     }
 
+    void upLazy(int node)
+    {
+        int parent = (node-1)/2;
+        // Si el nodo esta marcado para actualizacion, acarrear la actualizacion del padre
+        // a la del hijo
+        // Sino, reemplazar la actualizacion y marcar el nodo para actualizacion
+        if(markForUpdate[node])
+            lazy[node] = Op::up(lazy[node], lazy[parent]);
+        else
+        {
+            lazy[node]=lazy[parent];
+            markForUpdate[node]=true;
+        }
+    }
+
     void propagate(int node, int l_, int r_) {
+        if(!markForUpdate[node])
+            return;
         int len = r_ - l_;
         if (len > 1) { // no es hoja, combino actualizaciones en los hijos
-            lazy[izq(node)] = Op::up(lazy[izq(node)], lazy[node]);
-            lazy[der(node)] = Op::up(lazy[der(node)], lazy[node]);
+            upLazy(izq(node));
+            upLazy(der(node));
         }
         v[node] = Op::applyToInterval({l_,r_},v[node],lazy[node]);
-        lazy[node] = Op::uneut();
+        markForUpdate[node]=false;
     }
 };

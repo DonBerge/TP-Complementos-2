@@ -2,10 +2,10 @@
 
 TESTDIRS += tests/ropeEnteros
 TESTDIRS += tests/ropeEnterosLazy
-TESTDIRS += tests/ropeGenericoSuma
-TESTDIRS += tests/ropeGenericoMinimo
-TESTDIRS += tests/ropeGenericoPrefijos
-TESTDIRS += tests/ropeGenericoSets
+TESTDIRS += tests/ropeGenerico/Suma
+TESTDIRS += tests/ropeGenerico/Minimo
+TESTDIRS += tests/ropeGenerico/Prefijos
+TESTDIRS += tests/ropeGenerico/Sets
 TESTDIRS += tests/ropeGenericoLazyMaximo
 TESTDIRS += tests/ropeGenericoLazySuma
 

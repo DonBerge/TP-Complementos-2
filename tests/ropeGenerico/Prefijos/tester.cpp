@@ -19,7 +19,7 @@
 */
 #include <iostream>
 #include <vector>
-#include "../../src/ropeGenerico.cpp"
+#include "../../../src/ropeGenerico.cpp"
 
 using namespace std;
 

@@ -21,7 +21,7 @@
 #include <algorithm>
 #include <iterator>
 #include <set>
-#include "../../src/ropeGenerico.cpp"
+#include "../../../src/ropeGenerico.cpp"
 
 #define CHECK(b) (b ? "YES" : "NO")
 
