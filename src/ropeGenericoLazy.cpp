@@ -8,27 +8,6 @@
 
 using namespace std;
 
-/*
-    + = T
-    * = U
-    
-    Para poder combinar actualizaciones, se tiene que cumplir que:
-    (v*u)*w = v*(u*w)
-    Es decir, * tiene que ser asociativa
-
-    Para poder calcular el resultado sin recursionar, es necesario que * sea
-    distributiva sobre +.
-    a*u + b*u + c*u = (a+b+c)*u
-
-    a+u+b+u+c+u
-    =
-    (a+b+c)+u*n
-
-    (a=u) + (b=u) + (c=u)
-    =
-    ((a+b+c)=u)*n
-*/
-
 template<typename T>
 concept Monoid = requires(T::Value a, T::Value b, T::Value c) {
 typename T::Value; // hay un tipo de valores
@@ -42,13 +21,14 @@ typename T::Value; // hay un tipo de valores
 template<typename T>
 concept Updater = Monoid<T> && requires(T::Value a, T::Update b, T::Update c, Interval i) {
 typename T::Update; // hay un tipo de actualizaciones
-// up es la operacion de actualizacion
+// up es la operacion que combina actualizaciones
 { T::up(b, c) } -> std::same_as<typename T::Update>; // clausura de la operacion
 // T::up(a, T::up(b, c)) == T::up(T::up(a, b), c) // asociatividad de la operacion
+
+// Aplica una actualizacion a un intervalo dado
 { T::applyToInterval(i, a, b)} -> std::same_as<typename T::Value>;
-// i = Intervalo donde se ejecuta la actualizacion
-// a = Valor correspondiente al intervalo
-// b = Valor de la actualizacion combinada
+// Tiene que cumplir la siguiente propiedad
+// forall i. applyToInterval(i,applyToInterval(i,a,b),c) == applyToInterval(i,a,up(b,c))
 };
 
 template<typename Op>
@@ -61,7 +41,8 @@ public:
         N=n;
         v.resize(4*n, Op::neut());
         lazy.resize(4*n);
-        markForUpdate.resize(4*n,false); 
+        markForUpdate.resize(4*n,false); // Marca si un nodo esta marcado para actualizar o no. Sirve para poder
+        // utilizar operaciones de combinar actualizaciones que no tengan elemento neutro.
     }
     // Construye un rope a partir de un array
     Rope(vector<typename Op::Value>& a) : Rope(a.size()) { // primero construyo el rope vacio con N=a.size()

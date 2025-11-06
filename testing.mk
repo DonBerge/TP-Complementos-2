@@ -7,7 +7,8 @@ TESTDIRS += tests/ropeGenerico/Minimo
 TESTDIRS += tests/ropeGenerico/Prefijos
 TESTDIRS += tests/ropeGenerico/Sets
 TESTDIRS += tests/ropeGenericoLazy/MaximoYSuma
-TESTDIRS += tests/ropeGenericoLazy/SumaYSuma
+TESTDIRS += tests/ropeGenericoLazy/SumaYConsulta
+TESTDIRS += tests/ropeGenericoLazy/SumaYIgualYSuma
 
 TESTS	:= $(shell find $(TESTDIRS) -name '*.in' -type f | sort)
 
