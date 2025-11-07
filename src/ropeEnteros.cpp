@@ -18,30 +18,31 @@ struct Rope {
     vector<ll> v;
     int N;
 
-    Rope(int n) {
-        v.resize(4*n);
-        N=n;
-    }
+    Rope(int n) { v.resize(4*n); N=n; }
 
-    ll query(int l, int r)
-    {
-        return query(l,r,0,0,N);
-    }
+    ll query(int l, int r) { return query(l,r,0,0,N); }
+
     void update(int i, ll x) { update_impl(0,0,N,i,x); }
 
+    // Realiza la consulta sobre el intervalo [l, r)
     ll query(int l, int r, int i, int lp, int rp) {
         if(r<=l)
             return 0;
         if(interval_subset({lp,rp},{l,r}))
             return v[i];
 
+        Interval m = interval_meet({l,r},{lp,rp});        
+        if(m == eInterval)
+            return 0;
+
         int mid = (lp+rp)/2;
-        
+
         Interval ml = interval_meet({l,r}, {lp,mid});
         Interval mr = interval_meet({l,r}, {mid, rp});
         return query(ml.first,ml.second, izq(i), lp, mid) + query(mr.first,mr.second, der(i), mid, rp);
     }
 
+    // Realiza la acutalizacion del indice i
     void update_impl(int nodo, int l_, int r_, int i, ll x) {
         int l = i, r = i+1;
         if (l <= l_ && r_ <= r) { 

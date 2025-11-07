@@ -10,27 +10,23 @@ using Interval = pair<int,int>;
 Interval eInterval = {0,0};
 
 
-
-int interval_len(Interval i)
-{
-    return i.snd - i.fst;
-}
-
+// Realizamos la interseccion de los itervalos i y j
 Interval interval_meet(Interval i, Interval j)
 {
     int a = i.fst,b=i.snd,c=j.fst,d=j.snd;
 
     if(a<=c && d<=b)
         return {c,d};
-    if(c<=a && b<=d)
+    else if(c<=a && b<=d)
         return {a,b};
-    if(a<=c && b<=d)
+    else if(a<=c && b<=d)
         return {c,b};
-    if(c<=a && d<=b)
+    else if(c<=a && d<=b)
         return {a,d};
     return eInterval;
 }
 
+// Revisamos que el intervalo i este completamente incluido en el intevalo j
 bool interval_subset(Interval i, Interval j)
 {
     return interval_meet(i,j)==i;

@@ -6,6 +6,18 @@
 #define izq(n) (2*n+1)
 #define der(n) (2*n+2)
 
+/*
+b)
+Las propiedades que debe tener el conjunto de valores es:
+    * Ser asociativa
+    * Tener elemento neutro
+(es decir los elementos y la operacion forman un Monoide)
+
+Las propiedades que debe tener el conjunto de actualiazcion es;
+    * Ser asociativa
+    * ??
+*/
+
 using namespace std;
 
 template<typename T>
@@ -23,7 +35,7 @@ concept Updater = Monoid<T> && requires(T::Value a, T::Update b, T::Update c, In
 typename T::Update; // hay un tipo de actualizaciones
 // up es la operacion que combina actualizaciones
 { T::up(b, c) } -> std::same_as<typename T::Update>; // clausura de la operacion
-// T::up(a, T::up(b, c)) == T::up(T::up(a, b), c) // asociatividad de la operacion
+// T::up(a, T::up(b, c)) == T::up(T::up(a, b), c)    // asociatividad de la operacion
 
 // Aplica una actualizacion a un intervalo dado
 { T::applyToInterval(i, a, b)} -> std::same_as<typename T::Value>;
@@ -41,16 +53,22 @@ public:
         N=n;
         v.resize(4*n, Op::neut());
         lazy.resize(4*n);
-        markForUpdate.resize(4*n,false); // Marca si un nodo esta marcado para actualizar o no. Sirve para poder
-        // utilizar operaciones de combinar actualizaciones que no tengan elemento neutro.
+        markForUpdate.resize(4*n,false); // Marca si un nodo esta marcado para actualizar o no. 
+                                         // Sirve para poder utilizar operaciones de combinar 
+                                         // actualizaciones que no tengan elemento neutro.
     }
+
     // Construye un rope a partir de un array
-    Rope(vector<typename Op::Value>& a) : Rope(a.size()) { // primero construyo el rope vacio con N=a.size()
+    Rope(vector<typename Op::Value>& a) : Rope(a.size()) 
+    {
+        // primero construyo el rope vacio con N=a.size()
         build(a,0,0,a.size()); // Luego llamo a build usando el array a
     }
     
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
+
     void update(int i, Op::Update x) { update_rango(i,i+1,x); }
+
     void update_rango(int l, int r, Op::Update x) { update_impl(0,0,N,l,r,x);}
 
     
@@ -63,7 +81,7 @@ private:
     // Ya no es posible construir el rope haciendo un update por cada elemento del array
     // ya que la operacion de actualizacion puede diferir de la de consulta.
     // Por lo tanto tenemos una funcion para construir el rope a partir de un vector
-    void build(vector<typename Op::Value>& a,int node, int lp, int rp)
+    void build(vector<typename Op::Value>& a, int node, int lp, int rp)
     {
         if(rp<=lp)
             return;
@@ -78,6 +96,7 @@ private:
         }
     }
     
+    // Realiza la consulta sobre el intervalo [l, r)
     Op::Value query(int l, int r, int i, int lp, int rp) {
         if(r<=l)
             return Op::neut();
@@ -102,6 +121,7 @@ private:
             );
     }
 
+    // Realiza la acutalizacion del intervalo [l, r) usando la operacion upd
     void update_impl(int node, int l_, int r_, int l, int r, Op::Update upd) {
         propagate(node, l_, r_);
         if (l <= l_ && r_ <= r) { markForUpdate[node]=true; lazy[node] = upd; propagate(node, l_, r_); return; }
@@ -115,8 +135,7 @@ private:
     void upLazy(int node)
     {
         int parent = (node-1)/2;
-        // Si el nodo esta marcado para actualizacion, acarrear la actualizacion del padre
-        // a la del hijo
+        // Si el nodo esta marcado para actualizacion, acarrear la actualizacion del padre a la del hijo
         // Sino, reemplazar la actualizacion y marcar el nodo para actualizacion
         if(markForUpdate[node])
             lazy[node] = Op::up(lazy[node], lazy[parent]);

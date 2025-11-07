@@ -8,12 +8,24 @@
 
 using namespace std;
 
+/*
+b)
+La propiedad que deben satifacer los valores almacenados en las hojas del rope
+para cumplir las propiedades vistas en la introduccion y los costos sgueridos 
+para las oepracioens son:
+    * Ser asociativas
+    * Poseer elemento neutro
+
+(es decir los elementos y la operacion forman un Monoide)
+*/
+
+
 template<typename T>
 concept Monoid = requires(T::Value a, T::Value b, T::Value c) {
 typename T::Value; // hay un tipo de valores
 { T::op(a, b) } -> std::same_as<typename T::Value>; // clausura de la operacion
-// T::op(a, T::op(b, c)) == T::op(T::op(a, b), c) // asociatividad de la operacion
-{ T::neut() } -> std::same_as<typename T::Value>; // existencia del neutro
+// T::op(a, T::op(b, c)) == T::op(T::op(a, b), c)   // asociatividad de la operacion
+{ T::neut() } -> std::same_as<typename T::Value>;   // existencia del neutro
 // T::op(a, T::neut()) == a // neutro por derecha
 // T::op(T::neut(), a) == a // neutro por izquierda
 };
@@ -24,13 +36,16 @@ requires Monoid<Op>
 class Rope {
 public:
     Rope(int n) { v.resize(4*n, Op::neut()); N=n; }
+
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
+
     void update(int i, typename Op::Value x) { update_impl(0,0,N,i,x); }
 
 private:
     std::vector<typename Op::Value> v;
     int N;
 
+    // Realiza la consulta sobre el intervalo [l, r
     Op::Value query(int l, int r, int i, int lp, int rp) {
         if(r<=l)
             return Op::neut();
@@ -43,7 +58,6 @@ private:
 
         int mid = (lp+rp)/2;
 
-        
         Interval ml = interval_meet(m, {lp,mid});
         Interval mr = interval_meet(m, {mid, rp});
         return
@@ -53,9 +67,13 @@ private:
             );
     }
 
+    // Realiza la acutalizacion del indice i
     void update_impl(int nodo, int l_, int r_, int i, Op::Value x) {
         int l = i, r = i+1;
-        if (l <= l_ && r_ <= r) { v[nodo] = x; return; }
+        if (l <= l_ && r_ <= r) { 
+            v[nodo] = x; 
+            return; 
+        }
         if (r <= l_ || r_ <= l) return;
         int m_ = (l_ + r_) / 2;
         // obs: una sola de estas dos llamadas hace algo, la otra cae en el caso base trivial
