@@ -1,6 +1,6 @@
 ---
-title: "Your Desired Document Title"
-author: "Your Name"
+title: "Trabajo práctico 1"
+author: "Agustín Fernández Bergé y Ramiro Gatto"
 date: "November 7, 2025"
 ---
 # Trabajo práctico 1
@@ -12,6 +12,8 @@ En la carpeta `src` se encuentran todas las implementaciones de rope más archiv
 - `ropeEnterosLazy.cpp`: Es la implementación del rope pedido en la Parte 2, item a.
 - `ropeGenerico.cpp`: Es la implementación del rope pedido en la Parte 1, item c.
 - `ropeGenericoLazy.cpp`: Es la implementación del rope pedido en la Parte 2, item c.
+
+(El item b de la Parte 1 esta en `ropeGenerico.cpp` y el de pa Parte 2 en `ropeGenericoLazy.cpp`)
 
 En la carpeta `tests` se encuentran los casos de prueba usados para probar las implementaciones de arriba, cada test contiene un archivo `tester.cpp` que utiliza una implementación de rope para resolver un problema particular(el cual esta descrito en el mismo archivo `tester.cpp`). Los archivos de extensión `N.in` representan un caso de prueba particular y los archivos `N.out` su solución correspondiente.
 
