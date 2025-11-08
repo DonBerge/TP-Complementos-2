@@ -1,10 +1,25 @@
 #include <concepts>
 #include <iostream>
 #include <vector>
+#include <cassert>
 #include "interval.cpp"
 
 #define izq(n) (2*n+1)
 #define der(n) (2*n+2)
+
+unsigned next_power_of_2(unsigned n)
+{
+    if(n==0)
+        return 1;
+    if((n & (n-1)) == 0)
+        return n; // ya es potencia de 2
+    unsigned msb = 0; // el bit mas significativo de n
+    for(unsigned i=0;i<32;i++)
+        if(n & (1<<i))
+            msb = i;
+    //cout<<"Most significant bit of "<<n<<" is bit "<<msb<<" the next power of 2 is therefore "<<(1<<(msb+1))<<endl;
+    return 1<<(msb+1);
+}
 
 /*
 b)
@@ -15,7 +30,12 @@ Las propiedades que debe tener el conjunto de valores es:
 
 Las propiedades que debe tener el conjunto de actualiazcion es;
     * Ser asociativa
-    * ??
+    * Aplicar dos actualizaciones sucesivas a un intervalo es lo mismo que aplicarla luego de combinarlas
+        Si f es la operacion de combinacion de Actualizaciones entonces
+        applyToInterval(i,v,f(a,b))=applyToInterval(i,applyToInterval(i,v,a),b)
+        Donde i = Intervalo donde se aplica la actualizacion y v es su valor asociado.
+        applyToInterval(i,v,a) devuelve el valor asociado al intervalo i con valor v luego de aplicar la
+        actualizacion a
 */
 
 using namespace std;
@@ -51,9 +71,10 @@ public:
     Rope(int n) 
     { 
         N=n;
-        v.resize(4*n, Op::neut());
-        lazy.resize(4*n);
-        markForUpdate.resize(4*n,false); // Marca si un nodo esta marcado para actualizar o no. 
+        unsigned sz = 2*next_power_of_2(n)+1;
+        v.resize(sz, Op::neut());
+        lazy.resize(sz);
+        markForUpdate.resize(sz,false); // Marca si un nodo esta marcado para actualizar o no. 
                                          // Sirve para poder utilizar operaciones de combinar 
                                          // actualizaciones que no tengan elemento neutro.
     }

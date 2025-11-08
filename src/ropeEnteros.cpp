@@ -10,6 +10,20 @@
 
 using namespace std;
 
+unsigned next_power_of_2(unsigned n)
+{
+    if(n==0)
+        return 1;
+    if((n & (n-1)) == 0)
+        return n; // ya es potencia de 2
+    unsigned msb = 0; // el bit mas significativo de n
+    for(unsigned i=0;i<32;i++)
+        if(n & (1<<i))
+            msb = i;
+    //cout<<"Most significant bit of "<<n<<" is bit "<<msb<<" the next power of 2 is therefore "<<(1<<(msb+1))<<endl;
+    return 1<<(msb+1);
+}
+
 // Usamos long long porque minimiza el riesgo de overflow y por lo
 // tanto permite que la operacion sea cerrada.
 using ll = long long;
@@ -18,7 +32,7 @@ struct Rope {
     vector<ll> v;
     int N;
 
-    Rope(int n) { v.resize(4*n); N=n; }
+    Rope(int n) { v.resize(2*next_power_of_2(n)+1); N=n; }
 
     ll query(int l, int r) { return query(l,r,0,0,N); }
 

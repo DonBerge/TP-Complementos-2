@@ -8,14 +8,29 @@
 
 using ll = long long;
 
+unsigned next_power_of_2(unsigned n)
+{
+    if(n==0)
+        return 1;
+    if((n & (n-1)) == 0)
+        return n; // ya es potencia de 2
+    unsigned msb = 0; // el bit mas significativo de n
+    for(unsigned i=0;i<32;i++)
+        if(n & (1<<i))
+            msb = i;
+    //cout<<"Most significant bit of "<<n<<" is bit "<<msb<<" the next power of 2 is therefore "<<(1<<(msb+1))<<endl;
+    return 1<<(msb+1);
+}
+
 struct Rope {
     vector<ll> v;
     vector<ll> lazy;
     int N;
 
     Rope(int n) {
-        v.resize(4*n);
-        lazy.resize(4*n);
+        unsigned sz = 2*next_power_of_2(n)+1;
+        v.resize(sz);
+        lazy.resize(sz);
         N=n;
     }
 

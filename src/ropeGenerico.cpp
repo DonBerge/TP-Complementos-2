@@ -8,6 +8,20 @@
 
 using namespace std;
 
+unsigned next_power_of_2(unsigned n)
+{
+    if(n==0)
+        return 1;
+    if((n & (n-1)) == 0)
+        return n; // ya es potencia de 2
+    unsigned msb = 0; // el bit mas significativo de n
+    for(unsigned i=0;i<32;i++)
+        if(n & (1<<i))
+            msb = i;
+    //cout<<"Most significant bit of "<<n<<" is bit "<<msb<<" the next power of 2 is therefore "<<(1<<(msb+1))<<endl;
+    return 1<<(msb+1);
+}
+
 /*
 b)
 La propiedad que deben satifacer los valores almacenados en las hojas del rope
@@ -35,7 +49,7 @@ template<typename Op>
 requires Monoid<Op>
 class Rope {
 public:
-    Rope(int n) { v.resize(4*n, Op::neut()); N=n; }
+    Rope(int n) { v.resize(2*next_power_of_2(n)+1, Op::neut()); N=n; }
 
     typename Op::Value query(int l, int r) { return query(l,r,0,0,N); }
 
